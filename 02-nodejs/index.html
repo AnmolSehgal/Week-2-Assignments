@@ -1,0 +1,88 @@
+<html>
+<head>
+    <title>
+        TODO app
+    </title>
+</head>
+<script>
+
+    const renderAllTodosCallback = (data)=>
+    {     
+            const todo = data;
+            const listAllTodos = document.getElementById('all-todos') 
+
+            
+                const item = document.createElement('div');
+                item.className = 'todo'
+
+                const title = document.createElement('h2');
+                title.innerHTML = todo.title;
+
+                const description = document.createElement('p');
+                description.innerHTML = todo.description;
+
+                const button = document.createElement('button');
+                button.innerHTML = 'Delete';
+                button.addEventListener('click',()=>{
+                    fetch(`http://localhost:3000/todos/${data.id}`, {
+                        method: "DELETE",
+                        headers: {
+                            "Content-Type": "application/json"
+                        }
+                    }).then((res)=>{
+                        listAllTodos.removeChild(item);
+                    })
+                })
+                
+                item.append(title,description,button);
+                listAllTodos.appendChild(item);
+
+            
+    }
+
+    function callback(resp) {
+        resp.json().then(renderAllTodosCallback);
+    }
+
+    function getAllData(){
+        fetch("http://localhost:3000/todos", {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json"
+            }
+        }).then((res)=>{
+            res.json().then
+            ((data)=> {
+                for(let i=0;i<data.length;i++)
+                    renderAllTodosCallback(data[i]);
+            })
+        })
+    }
+
+    getAllData();
+
+    function onPress() {
+        fetch("http://localhost:3000/todos", {
+            method: "POST",
+            body: JSON.stringify({
+                title: document.getElementById('title').value,
+                description: document.getElementById('description').value
+            }),
+            headers: {
+                "Content-Type": "application/json"
+            }
+        }).then(callback)
+    }
+</script>
+<body>
+    Todo title
+    <input type="text" id="title"></input>
+    <br><br>
+    Todo description
+    <input type="text" id="description"></input>
+    <br><br>
+    <button onclick="onPress()">send todo</button>
+
+    <div id="all-todos" style="display: grid;grid-template-columns: repeat(5, 1fr);gap: 10px;grid-auto-rows: minmax(50px, auto);"></div>
+</body>
+</html>
